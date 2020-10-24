@@ -1,0 +1,23 @@
+{
+  "name": "spotify-status-to-tg",
+  "version": "1.0.0",
+  "description": "Display spotify music status to bio in telegram",
+  "author": "vi.latyshev",
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsc --watch",
+    "start": "tsc"
+  },
+  "dependencies": {
+    "@mtproto/core": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.2",
+    "@typescript-eslint/eslint-plugin": "^4.5.0",
+    "@typescript-eslint/parser": "^4.5.0",
+    "eslint": "^7.12.0",
+    "eslint-config-airbnb-typescript": "^12.0.0",
+    "eslint-plugin-import": "^2.22.1",
+    "typescript": "^4.0.3"
+  }
+}

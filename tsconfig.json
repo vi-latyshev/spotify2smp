@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "module": "esnext",
+        "target": "ESNext",
+        "baseUrl": "./src",
+        "noEmit": true,
+        "allowJs": true,
+        "strict": true,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true,
+        "downlevelIteration": true,
+        "typeRoots": [
+            "./node_modules/@types",
+            "./src/*.d.ts",
+            "@types",
+        ]
+    },
+    "exclude": [
+        "../node_modules"
+    ]
+}
