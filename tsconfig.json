@@ -1,20 +1,23 @@
 {
     "compilerOptions": {
-        "module": "esnext",
         "target": "ESNext",
+        "module": "CommonJS",
         "baseUrl": "./src",
-        "noEmit": true,
+        "outDir": "./dist",
         "allowJs": true,
         "strict": true,
         "moduleResolution": "node",
         "allowSyntheticDefaultImports": true,
         "downlevelIteration": true,
+        "skipLibCheck": true,
         "typeRoots": [
             "./node_modules/@types",
-            "./src/*.d.ts",
             "@types",
         ]
     },
+    "include": [
+        "src/**/*"
+    ],
     "exclude": [
         "../node_modules"
     ]
