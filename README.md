@@ -1,1 +1,1 @@
-spotify-status-to-tg
+Display Spotify music status to social media platforms

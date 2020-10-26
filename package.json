@@ -1,7 +1,7 @@
 {
-  "name": "spotify-status-to-tg",
+  "name": "spotify2smp",
   "version": "1.0.0",
-  "description": "Display Spotify music status on some social media",
+  "description": "Display Spotify music status to some social media platforms",
   "author": "vi.latyshev",
   "license": "MIT",
   "scripts": {
