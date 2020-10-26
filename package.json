@@ -1,15 +1,15 @@
 {
   "name": "spotify-status-to-tg",
   "version": "1.0.0",
-  "description": "Display spotify music status to bio in telegram",
+  "description": "Display Spotify music status on some social media",
   "author": "vi.latyshev",
   "license": "MIT",
   "scripts": {
-    "dev": "tsc --watch",
-    "start": "tsc"
+    "start": "set NODE_PATH=dist&& tsc && node dist/index.js"
   },
   "dependencies": {
-    "airgram": "^3.1.1"
+    "@mtproto/core": "^5.0.0",
+    "dotenv": "^8.2.0"
   },
   "devDependencies": {
     "@types/node": "^14.14.2",

@@ -1,23 +1,24 @@
 {
     "compilerOptions": {
-        "target": "ESNext",
-        "module": "CommonJS",
+        "target": "ES6",
+        "module": "commonjs",
         "baseUrl": "./src",
         "outDir": "./dist",
+        "sourceMap": true,
         "allowJs": true,
         "strict": true,
         "moduleResolution": "node",
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
         "allowSyntheticDefaultImports": true,
         "downlevelIteration": true,
         "skipLibCheck": true,
+        "isolatedModules": true,
         "typeRoots": [
             "./node_modules/@types",
             "@types",
         ]
     },
-    "include": [
-        "src/**/*"
-    ],
     "exclude": [
         "../node_modules"
     ]
