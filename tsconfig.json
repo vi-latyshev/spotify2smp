@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "ES6",
+        "target": "ESNext",
         "module": "commonjs",
         "baseUrl": "./src",
         "outDir": "./dist",
@@ -19,6 +19,10 @@
             "@types",
         ]
     },
+    "include": [
+        "src/**/*",
+        "@types",
+    ],
     "exclude": [
         "../node_modules"
     ]
