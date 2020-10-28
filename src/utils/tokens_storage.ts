@@ -1,35 +1,39 @@
 import { readFile, writeFile } from 'fs/promises';
+import { join } from 'path';
 
-const TOKENS_FILE = 'tokens.json';
+const { NODE_PATH } = process.env;
 
-class TokenStorage {
-    private tokens = new Map<string, string>();
+const TOKENS_FILE = join(NODE_PATH as string, 'tokens.json');
+
+class TokensStorage {
+    private tokens = new Map<string, string | object>();
 
     private isFileReaded: boolean = false;
 
-    public hasToken = async (name: string) => {
+    public has = async (name: string) => {
         if (!this.isFileReaded) {
-            await this.readTokensFile();
+            await this.readFile();
         }
         return this.tokens.has(name);
     };
 
-    public getToken = async (name: string) => {
+    public get = async (name: string) => {
         if (!this.isFileReaded) {
-            await this.readTokensFile();
+            await this.readFile();
         }
         return this.tokens.get(name);
     };
 
-    public setToken = async (name: string, value: string) => {
-        this.tokens = {
-            ...this.tokens,
-            [name]: value,
-        };
+    public set = async (name: string, value: string | object) => {
+        const stringifyValue = typeof value === 'object'
+            ? JSON.stringify(value)
+            : value;
+
+        this.tokens.set(name, stringifyValue);
         await this.writeToFile();
     };
 
-    private readTokensFile = async () => {
+    private readFile = async () => {
         try {
             const file = await readFile(TOKENS_FILE);
             const objectOfTokens = JSON.parse(file.toString('utf8'));
@@ -38,8 +42,9 @@ class TokenStorage {
         } catch (error) {
             if (error.code === 'ENOENT') {
                 await this.writeToFile();
+            } else {
+                throw error;
             }
-            throw error;
         }
 
         this.isFileReaded = true;
@@ -50,8 +55,8 @@ class TokenStorage {
      */
     private writeToFile = async () => {
         const objectOfTokens = Object.fromEntries(this.tokens);
-        await writeFile(TOKENS_FILE, JSON.stringify(objectOfTokens));
+        await writeFile(TOKENS_FILE, JSON.stringify(objectOfTokens, null, '\t'));
     };
 }
 
-export const tokenStorage = new TokenStorage();
+export const tokensStorage = new TokensStorage();

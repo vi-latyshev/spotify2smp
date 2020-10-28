@@ -1,1 +1,1 @@
-Display Spotify music status to social media platforms
+Display Spotify playback status to social media platforms

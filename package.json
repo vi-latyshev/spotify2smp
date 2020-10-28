@@ -1,18 +1,25 @@
 {
   "name": "spotify2smp",
   "version": "1.0.0",
-  "description": "Display Spotify music status to some social media platforms",
+  "description": "Display Spotify playback status to some social media platforms",
   "author": "vi.latyshev",
   "license": "MIT",
   "scripts": {
-    "start": "set NODE_PATH=dist&& tsc && node dist/index.js"
+    "start": "set DEBUG=module:* & set NODE_PATH=dist&& tsc && node dist/index.js"
   },
   "dependencies": {
     "@mtproto/core": "^5.0.0",
-    "dotenv": "^8.2.0"
+    "debug": "^4.2.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "open": "^7.3.0",
+    "spotify-web-api-node": "^5.0.0"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.5",
+    "@types/express": "^4.17.8",
     "@types/node": "^14.14.2",
+    "@types/spotify-web-api-node": "^4.0.1",
     "@typescript-eslint/eslint-plugin": "^4.5.0",
     "@typescript-eslint/parser": "^4.5.0",
     "eslint": "^7.12.0",

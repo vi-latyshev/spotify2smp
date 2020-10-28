@@ -29,6 +29,7 @@ module.exports = {
         'import/no-default-export': 'off',
         'no-mixed-operators': 'off',
         'no-shadow': 'off',
+        'linebreak-style': 'off',
         'import/order': 'off',
         'consistent-return': 'off',
         'no-param-reassign': ['error', { 'props': false }],
