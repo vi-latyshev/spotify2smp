@@ -1,7 +1,8 @@
 import { MTProto, getSRPParams } from '@mtproto/core';
 
 import { prompt } from 'utils/prompt';
-import { getRandomPhone } from 'telegram/utils/randomPhone';
+
+import { getRandomPhone } from './utils/randomPhone';
 
 import type {
     CallApiFn,

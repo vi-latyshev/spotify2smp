@@ -1,4 +1,5 @@
 import SpotifyWebApi from 'spotify-web-api-node';
+
 import { SpotifyAuth } from './spotify_auth';
 
 const { SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET } = process.env;
