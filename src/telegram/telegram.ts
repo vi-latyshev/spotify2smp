@@ -2,8 +2,6 @@ import { MTProto, getSRPParams } from '@mtproto/core';
 
 import { prompt } from 'utils/prompt';
 
-import { getRandomPhone } from './utils/randomPhone';
-
 import type {
     CallApiFn,
     CheckPassword,
@@ -13,9 +11,14 @@ import type {
     SendCode,
     SignIn,
     UpdateProfile,
+    UserUnion,
 } from './types';
 
-const { IS_DEV, TELEGRAM_API_ID, TELEGRAM_API_HASH } = process.env;
+const {
+    TELEGRAM_API_ID,
+    TELEGRAM_API_HASH,
+    TELEGRAM_DEFAULT_BIO,
+} = process.env;
 
 export class TelegramClient {
     private api: MTProto;
@@ -24,25 +27,26 @@ export class TelegramClient {
         this.api = new MTProto({
             api_id: parseInt(TELEGRAM_API_ID),
             api_hash: TELEGRAM_API_HASH,
-            test: IS_DEV === 'true',
         });
     }
 
     // Auth
 
     /**
+     * @todo rewrite this shit. Auth needs only auth key not found
+     *
      * !! Implemented only for valid data !!
      *
      * !! Implemented only for password (2FA password) !!
      */
-    public login = async () => {
-        const phone = IS_DEV === 'true' ? getRandomPhone() : await prompt('Please enter your phone number');
+    public authorization = async (): Promise<UserUnion> => {
+        const phone = await prompt('Please enter your phone number');
 
         const sendCodeResult = await this.sendCode({
             phone_number: phone,
         });
 
-        const code = IS_DEV === 'true' ? '22222' : await prompt('Please enter the secret code') ?? '';
+        const code = await prompt('Please enter the secret code') ?? '';
 
         const signInResult = await this.signIn({
             phone_code: code,
@@ -60,7 +64,7 @@ export class TelegramClient {
                             g, p, salt1, salt2,
                         } = current_algo;
 
-                        const password = IS_DEV === 'true' ? 'password' : await prompt('Please enter your password') ?? '';
+                        const password = await prompt('Please enter your password') ?? '';
 
                         const { A, M1 } = await getSRPParams({
                             g,
@@ -79,12 +83,20 @@ export class TelegramClient {
             return Promise.reject(error);
         });
 
+        if (signInResult._ === 'auth.authorizationSignUpRequired') {
+            const user = await this.authorization();
+            return user;
+        }
+
         return signInResult.user;
     };
 
     // Account
 
-    public updateProfile: UpdateProfile = (params) => this.call('account.updateProfile', params);
+    public updateProfile: UpdateProfile = (params) => this.call('account.updateProfile', {
+        about: TELEGRAM_DEFAULT_BIO,
+        ...params,
+    });
 
     // Users
 

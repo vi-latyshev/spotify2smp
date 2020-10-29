@@ -1,9 +1,11 @@
 import SpotifyWebApi from 'spotify-web-api-node';
 import express from 'express';
-import debug from 'debug';
 import open from 'open';
 
 import { tokensStorage } from 'utils/tokens_storage';
+
+import { log } from './utils/log';
+import { checkRateLimit } from './utils/checkRateLimit';
 
 import type { Server } from 'net';
 
@@ -14,12 +16,15 @@ const REDIRECT_HOST = HOST ?? 'localhost';
 const REDIRECT_URI = `http://${REDIRECT_HOST}:${SERVER_PORT}/`;
 
 const SPOTIFY_TOKEN_NAME = 'spotify';
-const log = debug('module: Spotify');
 
 const SCOPES = ['user-read-currently-playing'];
 const REDIRECT_STATE = 'spoty2smp';
 
 export class SpotifyAuth {
+    private updateAcessTokenTimer: NodeJS.Timeout | null = null;
+
+    private acessTokenExpiresTime: number = 0;
+
     constructor(private api: SpotifyWebApi) {
         api.setRedirectURI(REDIRECT_URI);
     }
@@ -33,17 +38,50 @@ export class SpotifyAuth {
             const authCode = await this.createServer();
             await this.exchangeCodeToRefreshToken(authCode);
         }
-        const token = await tokensStorage.get(SPOTIFY_TOKEN_NAME);
 
-        return token as string;
+        const refreshToken = await tokensStorage.get(SPOTIFY_TOKEN_NAME) as string;
+        this.api.setRefreshToken(refreshToken);
+    };
+
+    /**
+     * Refreshes the token one min before expires
+     */
+    public setUpdateAccessTokenTimer = async () => {
+        if (this.updateAcessTokenTimer !== null) {
+            clearTimeout(this.updateAcessTokenTimer);
+            this.updateAcessTokenTimer = null;
+        }
+        await this.updateAccessToken();
+
+        this.updateAcessTokenTimer = setTimeout(
+            this.setUpdateAccessTokenTimer,
+            (this.acessTokenExpiresTime - 60) * 1000,
+        );
+    };
+
+    private updateAccessToken = async () => {
+        log('Getting new acess token');
+
+        const { body, headers } = await this.api.refreshAccessToken();
+        await checkRateLimit(headers, this.updateAccessToken);
+
+        const expiresTime = body.expires_in;
+
+        this.api.setAccessToken(body.access_token);
+        this.acessTokenExpiresTime = expiresTime;
+
+        log(`Access token updated. Expires in ${expiresTime} sec`);
     };
 
     private exchangeCodeToRefreshToken = async (authCode: string) => {
         log('Getting refresh token');
-        const { body } = await this.api.authorizationCodeGrant(authCode);
+
+        const { body, headers } = await this.api.authorizationCodeGrant(authCode);
+        await checkRateLimit(headers, () => this.exchangeCodeToRefreshToken(authCode));
 
         await tokensStorage.set(SPOTIFY_TOKEN_NAME, body.refresh_token);
-        log('Token saved');
+
+        log('Refresh token saved to storage');
     };
 
     private createServer = async () => new Promise<string>((resolve) => {

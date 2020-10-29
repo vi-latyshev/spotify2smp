@@ -5,7 +5,7 @@
   "author": "vi.latyshev",
   "license": "MIT",
   "scripts": {
-    "start": "set DEBUG=module:* & set NODE_PATH=dist&& tsc && node dist/index.js"
+    "start": "set NODE_PATH=dist&& tsc && node dist/index.js"
   },
   "dependencies": {
     "@mtproto/core": "^5.0.0",

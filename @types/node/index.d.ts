@@ -2,13 +2,6 @@
 
 declare namespace NodeJS {
     export interface ProcessEnv {
-        // App
-
-        /**
-         * @type {boolean}
-         */
-        IS_DEV: string;
-
         /**
          * Needs set if you will be deploy on other server (Heroku / Glitch / self hosted)
          *

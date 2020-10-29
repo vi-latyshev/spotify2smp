@@ -24,7 +24,7 @@ export type GetPassword = () => Promise<IAccountPassword>;
 
 export type CheckPassword = (params: ICheckPasswordParams) => Promise<IAuthAuthorizationUnion>;
 
-export type UpdateProfile = (params: IUpdateProfileParams) => Promise<IUser>;
+export type UpdateProfile = (params?: IUpdateProfileParams) => Promise<IUser>;
 
 export type GetFullUser = (params: IGetFullUser) => Promise<IUserFull>;
 
@@ -150,7 +150,7 @@ interface UserEmpty {
     id: number;
 }
 
-type UserUnion = IUser | UserEmpty;
+export type UserUnion = IUser | UserEmpty;
 
 interface PasswordKdfAlgo {
     salt1: Uint8Array;
