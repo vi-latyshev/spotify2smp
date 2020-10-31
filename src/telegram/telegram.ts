@@ -1,6 +1,6 @@
 import { MTProto, getSRPParams } from '@mtproto/core';
 
-import { prompt } from 'utils/prompt';
+import { log, prompt } from './utils/log';
 
 import type {
     CallApiFn,
@@ -15,6 +15,7 @@ import type {
 } from './types';
 
 const {
+    IS_DEV,
     TELEGRAM_API_ID,
     TELEGRAM_API_HASH,
     TELEGRAM_DEFAULT_BIO,
@@ -40,55 +41,56 @@ export class TelegramClient {
      * !! Implemented only for password (2FA password) !!
      */
     public authorization = async (): Promise<UserUnion> => {
-        const phone = await prompt('Please enter your phone number');
+        let user: UserUnion | undefined;
 
-        const sendCodeResult = await this.sendCode({
-            phone_number: phone,
-        });
-
-        const code = await prompt('Please enter the secret code') ?? '';
-
-        const signInResult = await this.signIn({
-            phone_code: code,
-            phone_number: phone,
-            phone_code_hash: sendCodeResult.phone_code_hash,
-        }).catch(async (error: ICallError) => {
-            switch (error.error_message) {
-                case 'SESSION_PASSWORD_NEEDED': {
-                    return this.getPassword().then(async ({
-                        srp_B,
-                        srp_id,
-                        current_algo,
-                    }) => {
-                        const {
-                            g, p, salt1, salt2,
-                        } = current_algo;
-
-                        const password = await prompt('Please enter your password') ?? '';
-
-                        const { A, M1 } = await getSRPParams({
-                            g,
-                            p,
-                            salt1,
-                            salt2,
-                            gB: srp_B,
-                            password,
-                        });
-
-                        return this.checkPassword({ srp_id, A, M1 });
-                    });
-                }
-                default: break;
+        try {
+            const userFull = await this.getFullUser();
+            user = userFull.user;
+        } catch (userError) {
+            if (userError.error_message !== 'AUTH_KEY_UNREGISTERED') {
+                throw userError;
             }
-            return Promise.reject(error);
-        });
+            log('Authorization needed');
 
-        if (signInResult._ === 'auth.authorizationSignUpRequired') {
-            const user = await this.authorization();
-            return user;
+            const phone = await prompt('Please, enter your phone number', 'Required phone number');
+            const sendCodeResult = await this.sendCode({ phone_number: phone });
+
+            try {
+                const code = await prompt('Please enter the secret code', 'Required secret code');
+                const signInResult = await this.signIn({
+                    phone_code: code,
+                    phone_number: phone,
+                    phone_code_hash: sendCodeResult.phone_code_hash,
+                });
+                user = signInResult.user;
+            } catch (signInError) {
+                if (signInError.error_message !== 'SESSION_PASSWORD_NEEDED') {
+                    throw signInError;
+                }
+                // eslint-disable-next-line @typescript-eslint/naming-convention
+                const { srp_B, srp_id, current_algo } = await this.getPassword();
+                const {
+                    g, p, salt1, salt2,
+                } = current_algo;
+
+                const password = await prompt('Please enter user password', 'Required user password');
+
+                const { A, M1 } = await getSRPParams({
+                    g, p, salt1, salt2, gB: srp_B, password,
+                });
+
+                const authInfo = await this.checkPassword({ srp_id, A, M1 });
+                user = authInfo.user;
+            }
         }
 
-        return signInResult.user;
+        if (user === undefined || user._ === 'userEmpty') {
+            log('User not registered. Telegram module skiped');
+        } else {
+            log(`Authorized on: ${user.username}`);
+        }
+
+        return user;
     };
 
     // Account
@@ -100,7 +102,12 @@ export class TelegramClient {
 
     // Users
 
-    public getFullUser: GetFullUser = (params) => this.call('users.getFullUser', { id: params });
+    public getFullUser: GetFullUser = (params) => this.call('users.getFullUser', {
+        id: {
+            _: 'inputUserSelf',
+            ...params,
+        },
+    });
 
     // private Auth
 
@@ -125,9 +132,10 @@ export class TelegramClient {
     private call: CallApiFn = async (method, params, options) => (this.api
         .call(method, params as object, { syncAuth: true, ...options }) as Promise<any>)
         .catch(async (error: ICallError) => {
-            // eslint-disable-next-line no-console
-            console.warn(`call ${method} error:`, error);
-
+            if (IS_DEV === 'true') {
+                // eslint-disable-next-line no-console
+                console.warn(`call ${method} error:`, error);
+            }
             // eslint-disable-next-line @typescript-eslint/naming-convention
             const { error_code, error_message } = error;
 

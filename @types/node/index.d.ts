@@ -2,11 +2,18 @@
 
 declare namespace NodeJS {
     export interface ProcessEnv {
+        // App
+
+        /**
+         * if 'true' then will be showing more debug information
+         * @type {boolean}
+         */
+        IS_DEV: string;
         /**
          * Needs set if you will be deploy on other server (Heroku / Glitch / self hosted)
          *
          * @example 'your-name-app.herokuapp.com'
-         * @default 'http://localhost:${PORT}'
+         * @default 'localhost:${PORT}'
          */
         HOST: string;
 

@@ -26,7 +26,7 @@ export type CheckPassword = (params: ICheckPasswordParams) => Promise<IAuthAutho
 
 export type UpdateProfile = (params?: IUpdateProfileParams) => Promise<IUser>;
 
-export type GetFullUser = (params: IGetFullUser) => Promise<IUserFull>;
+export type GetFullUser = (params?: IGetFullUser) => Promise<IUserFull>;
 
 interface ISendCodeParams {
     phone_number: string,
@@ -176,7 +176,7 @@ interface IUpdateProfileParams {
 }
 
 interface IGetFullUser {
-    _: 'inputUserEmpty' | 'inputUserSelf' | 'inputUser' | 'inputUserFromMessage';
+    _?: 'inputUserEmpty' | 'inputUserSelf' | 'inputUser' | 'inputUserFromMessage';
     user_id?: number;
     access_hash?: number;
 }
