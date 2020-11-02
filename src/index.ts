@@ -53,13 +53,16 @@ const updateTrack = async () => {
 
     const currentTimer = `{${progressTimeInString} / ${durationTimeInString}}`;
     */
+    const MAX_NAME_LENGTH = (TELEGRAM_MAX_BIO_LENGTH - 4 - TEXT_BEFORE_NAME.length /* - currentTimer.length */) / 2;
+
     const allArtists = artists.map((artist) => artist.name);
-    const allArtistsInString = allArtists.join(' & ').substr(0,
-        (TELEGRAM_MAX_BIO_LENGTH - 4) - TEXT_BEFORE_NAME.length - name.length); // - currentTimer.length);
+    const allArtistsInString = allArtists.join(' & ').substr(0, MAX_NAME_LENGTH);
 
-    const status = `${TEXT_BEFORE_NAME}${allArtistsInString} > ${name}`; // ` ${currentTimer}`;
+    const nameBySubstr = name.substr(0, MAX_NAME_LENGTH);
 
-    log(`Curently playing: ${status}`);
+    const status = `${TEXT_BEFORE_NAME}${allArtistsInString} > ${nameBySubstr}`; // ` ${currentTimer}`;
+
+    log(`Curently status: ${status}`);
 
     await telegramClient.updateProfile({ about: status });
     log('Telegram bio updated');
