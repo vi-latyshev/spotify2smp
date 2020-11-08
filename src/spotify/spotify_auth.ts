@@ -4,7 +4,6 @@ import open from 'open';
 
 import { tokensStorage } from 'utils/tokens_storage';
 
-import { log } from './utils/log';
 import { checkRateLimit } from './utils/checkRateLimit';
 
 import type { Server } from 'net';
@@ -14,6 +13,7 @@ const { HOST, PORT } = process.env;
 const SERVER_PORT = PORT ?? 3005;
 const REDIRECT_HOST = HOST ?? 'localhost';
 const REDIRECT_URI = `http://${REDIRECT_HOST}:${SERVER_PORT}/`;
+const REDIRECT_ROUTE = 'spotify-auth';
 
 const SPOTIFY_TOKEN_NAME = 'spotify';
 
@@ -25,15 +25,15 @@ export class SpotifyAuth {
 
     private acessTokenExpiresTime: number = 0;
 
-    constructor(private api: SpotifyWebApi) {
-        api.setRedirectURI(REDIRECT_URI);
+    constructor(private log: debug.Debugger, private api: SpotifyWebApi) {
+        api.setRedirectURI(REDIRECT_URI + REDIRECT_ROUTE);
     }
 
     public getRefreshToken = async () => {
         const hasToken = await tokensStorage.has(SPOTIFY_TOKEN_NAME);
 
         if (!hasToken) {
-            log('Refresh token not found');
+            this.log('Refresh token not found');
 
             const authCode = await this.createServer();
             await this.exchangeCodeToRefreshToken(authCode);
@@ -60,41 +60,41 @@ export class SpotifyAuth {
     };
 
     private updateAccessToken = async () => {
-        log('Getting new acess token');
+        this.log('Getting new access token');
 
         const { body, headers } = await this.api.refreshAccessToken();
-        await checkRateLimit(headers, this.updateAccessToken);
+        await checkRateLimit(this.log, headers, this.updateAccessToken);
 
         const expiresTime = body.expires_in;
 
         this.api.setAccessToken(body.access_token);
         this.acessTokenExpiresTime = expiresTime;
 
-        log(`Access token updated. Expires in ${expiresTime} sec`);
+        this.log(`Access token updated. Expires in ${expiresTime} sec`);
     };
 
     private exchangeCodeToRefreshToken = async (authCode: string) => {
-        log('Getting refresh token');
+        this.log('Getting refresh token');
 
         const { body, headers } = await this.api.authorizationCodeGrant(authCode);
-        await checkRateLimit(headers, () => this.exchangeCodeToRefreshToken(authCode));
+        await checkRateLimit(this.log, headers, () => this.exchangeCodeToRefreshToken(authCode));
 
         await tokensStorage.set(SPOTIFY_TOKEN_NAME, body.refresh_token);
 
-        log('Refresh token saved to storage');
+        this.log('Refresh token saved to storage');
     };
 
     private createServer = async () => new Promise<string>((resolve) => {
-        log('Starting server for authorization');
+        this.log('Starting server for authorization');
 
         const app = express();
         let server: Server;
 
-        app.get('/', async (req, res) => {
+        app.get(`/${REDIRECT_ROUTE}`, async (req, res) => {
             const { state, code, error } = req.query;
 
             if (state !== REDIRECT_STATE) {
-                log('Wrong state from request');
+                this.log('Wrong state from request');
 
                 res.statusCode = 403;
                 res.end();
@@ -113,10 +113,10 @@ export class SpotifyAuth {
         });
 
         server = app.listen(SERVER_PORT, async () => {
-            log('Server listening request from Spotify server');
+            this.log('Server listening request from Spotify server');
             const authUrl = this.api.createAuthorizeURL(SCOPES, REDIRECT_STATE);
 
-            log('Opening browser for authorization in Spotify');
+            this.log('Opening browser for authorization in Spotify');
             await open(authUrl);
         });
     });

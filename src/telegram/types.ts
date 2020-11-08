@@ -24,9 +24,9 @@ export type GetPassword = () => Promise<IAccountPassword>;
 
 export type CheckPassword = (params: ICheckPasswordParams) => Promise<IAuthAuthorizationUnion>;
 
-export type UpdateProfile = (params?: IUpdateProfileParams) => Promise<IUser>;
+export type UpdateProfile = (params: IUpdateProfileParams) => Promise<IUser>;
 
-export type GetFullUser = (params?: IGetFullUser) => Promise<IUserFull>;
+export type GetFullUser = (params: IGetFullUser) => Promise<IUserFull>;
 
 interface ISendCodeParams {
     phone_number: string,
@@ -188,7 +188,7 @@ interface IUserFull {
     phone_calls_private?: true;
     can_pin_message?: true;
     has_scheduled?: true;
-    user: IUser;
+    user: UserUnion;
     about?: string;
     settings: object; // PeerSettings;
     profile_photo?: object; // Photo;

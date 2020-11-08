@@ -1,10 +1,12 @@
-import { log } from './log';
-
 /**
  * If getted 'rate limit' then will be waiting 'retry secs' and called callback
  * https://developer.spotify.com/documentation/web-api/#rate-limiting
  */
-export const checkRateLimit = async (headers: Record<string, string>, callback: () => Promise<any>) => {
+export const checkRateLimit = async (
+    log: debug.Debugger,
+    headers: Record<string, string>,
+    callback: () => Promise<any>,
+) => {
     const retryIn = headers['Retry-After'];
 
     if (retryIn === undefined) {

@@ -17,6 +17,33 @@ declare namespace NodeJS {
          */
         HOST: string;
 
+        /**
+         * Text before artists/name of track
+         *
+         * @default 'Now listening:'
+         */
+        TEXT_BEFORE_STATUS: string;
+
+        // modules
+
+        /**
+         * Turn on module
+         * %MODULE_NAME% with !UPPER CASE!
+         *
+         * @type {boolean}
+         *
+         * @example TELEGRAM = true
+         */
+        /**
+         * Default status
+         *
+         * %MODULE_NAME%_DEFAULT_STATUS
+         *
+         * @example TELEGRAM_DEFAULT_STATUS = 'this is default status'
+         */
+
+        // Api client secrets
+
         // Spotify
 
         SPOTIFY_CLIENT_ID: string;
@@ -24,16 +51,7 @@ declare namespace NodeJS {
 
         // Telegram
 
-        /**
-         * Update telegram bio
-         *
-         * @type {boolean}
-         */
-        TELEGRAM: string;
-
         TELEGRAM_API_ID: string;
         TELEGRAM_API_HASH: string;
-
-        TELEGRAM_DEFAULT_BIO: string;
     }
 }
