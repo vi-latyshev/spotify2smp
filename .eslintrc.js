@@ -56,6 +56,14 @@ module.exports = {
 
                 'constructor',
 
+                "public-abstract-field",
+                "protected-abstract-field",
+                "private-abstract-field",
+
+                "public-abstract-method",
+                "protected-abstract-method",
+                "private-abstract-method",
+
                 'public-method',
                 'protected-method',
                 'private-method'
