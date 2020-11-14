@@ -1,18 +1,10 @@
 import { getSRPParams } from '@mtproto/core';
 
-import { ModuleStatus } from 'module_entity';
+import { TelegramBase } from './telegram_base';
 
-import { TelegramApi } from './telegram_api';
+import type { IModuleStatus } from 'system';
 
-export class TelegramClient extends ModuleStatus {
-    readonly MAX_LENGTH = 70;
-
-    private api: TelegramApi = new TelegramApi();
-
-    constructor() {
-        super('Telegram');
-    }
-
+export class TelegramClient extends TelegramBase implements IModuleStatus {
     public authorization = async () => {
         let user = (await this.getSelf())?.user;
 
@@ -20,7 +12,10 @@ export class TelegramClient extends ModuleStatus {
             this.log('Authorization needed');
 
             const phone = await this.prompt('Please, enter your phone number', 'Required phone number');
-            const sendCodeResult = await this.api.sendCode({ phone_number: phone });
+            const sendCodeResult = await this.api.sendCode({
+                settings: { _: 'codeSettings' },
+                phone_number: phone,
+            });
 
             try {
                 const code = await this.prompt('Please enter the secret code', 'Required secret code');
@@ -46,13 +41,17 @@ export class TelegramClient extends ModuleStatus {
                     g, p, salt1, salt2, gB: srp_B, password,
                 });
 
-                const authInfo = await this.api.checkPassword({ srp_id, A, M1 });
+                const authInfo = await this.api.checkPassword({
+                    password: {
+                        _: 'inputCheckPasswordSRP', srp_id, A, M1,
+                    },
+                });
                 user = authInfo.user;
             }
         }
 
         if (user._ === 'userEmpty') {
-            this.log('User not registered. Skiped');
+            this.log('User not registered. Skipped');
         } else {
             this.log(`Authorized on: ${user.username}`);
         }
@@ -65,7 +64,7 @@ export class TelegramClient extends ModuleStatus {
 
     public getSelf = async () => {
         try {
-            return this.api.getFullUser({ _: 'inputUserSelf' });
+            return await this.api.getFullUser({ _: 'inputUserSelf' });
         } catch (e) {
             return undefined;
         }

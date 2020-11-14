@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import debug from 'debug';
 
-import { SpotifyClient } from 'spotify';
-import { TelegramClient } from 'telegram';
+import { SpotifyClient } from 'modules/spotify';
+import { TelegramClient } from 'modules/telegram';
 
 const log = debug('Player');
 log.enabled = true;

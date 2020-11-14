@@ -29,6 +29,7 @@ export type UpdateProfile = (params: IUpdateProfileParams) => Promise<IUser>;
 export type GetFullUser = (params: IGetFullUser) => Promise<IUserFull>;
 
 interface ISendCodeParams {
+    settings: CodeSettings,
     phone_number: string,
 }
 
@@ -60,6 +61,10 @@ interface AuthSentCodeTypeFlashCall {
 interface AuthSentCodeTypeSms {
     _: 'auth.sentCodeTypeSms';
     length: number;
+}
+
+interface CodeSettings {
+    _: 'codeSettings';
 }
 
 // https://github.com/typescript-eslint/typescript-eslint/issues/1824
@@ -164,6 +169,15 @@ interface SecurePasswordKdfAlgo {
 }
 
 interface ICheckPasswordParams {
+    password: IInputCheckPasswordEmpty | IInputCheckPasswordSRP;
+}
+
+interface IInputCheckPasswordEmpty {
+    _: 'inputCheckPasswordEmpty';
+}
+
+interface IInputCheckPasswordSRP {
+    _: 'inputCheckPasswordSRP';
     srp_id: number;
     A: Uint8Array;
     M1: Uint8Array;
